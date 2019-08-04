@@ -1,0 +1,6 @@
+nox
+poetry
+pylint
+pytest
+pytest-cov
+ipython

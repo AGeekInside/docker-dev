@@ -11,13 +11,10 @@ RUN echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
 RUN echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bashrc
 
 ENV PYENV_ROOT="$HOME/.pyenv"
-ENV PATH="${PYENV_ROOT}/bin:$PATH"
+ENV PATH="${PYENV_ROOT}/bin:${HOME}/.local/bin:$PATH"
 ENV HOME  /home/ageekinside
 ENV PYENV_ROOT $HOME/.pyenv
 ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
-
-RUN mkdir ~/workspace
-WORKDIR ~/workspace
 
 RUN pyenv install 3.7.4 
 #RUN pyenv install 3.8-dev 
@@ -26,12 +23,14 @@ RUN pyenv install 3.7.4
 RUN pyenv global 3.7.4 
 RUN pyenv rehash
 
-RUN python3 -m pip install --user pipx
-RUN python3 -m pipx ensurepath
+RUN mkdir ${HOME}/workspace
+WORKDIR ${HOME}/workspace
 
-RUN pipx install nox
-RUN pipx install poetry
+# Section to install baseline packages used for development
 
-RUN poetry completions bash > /etc/bash_completion.d/poetry.bash-completion
+ADD base-packages.txt ${HOME}/workspace
+
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install -r base-packages.txt
 
 CMD ["/bin/bash"]

@@ -20,5 +20,7 @@ RUN useradd --create-home --shell /bin/bash ageekinside
 RUN usermod -aG wheel ageekinside
 
 USER ageekinside
+RUN mkdir /home/ageekinside/scripts
+ADD base.bashrc /home/ageekinside/scripts/two_line_prompt.sh
 
 CMD ["/bin/bash"]
