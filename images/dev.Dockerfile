@@ -1,4 +1,7 @@
-FROM centos
+FROM ageekinside/base
 
-RUN yum update -y
+ADD base_packages.txt $HOME
+
+RUN pip install -r base_packages.txt \
+    && rm base_packages.txt
 
