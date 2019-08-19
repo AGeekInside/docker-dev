@@ -50,26 +50,23 @@ RUN curl -ksSL "https://github.com/docker/compose/releases/download/${COMPOSE_VE
     && chmod +x /usr/local/bin/docker-compose
 
 # Add user for dev work
-RUN useradd --create-home --shell /bin/bash ageekinside
-RUN adduser ageekinside sudo
+ARG DEV_USER=ageekinside
+RUN useradd --create-home --shell /bin/bash ${DEV_USER}
+RUN adduser ${DEV_USER} sudo
 
-USER ageekinside
-ENV HOME /home/ageekinside
+USER ${DEV_USER}
+ENV HOME /home/${DEV_USER}
 RUN mkdir -p $HOME/.venv
 ENV VIRTUAL_ENV=$HOME/.venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 
-RUN mkdir /home/ageekinside/scripts
-ADD two_line_prompt.sh /home/ageekinside/scripts/two_line_prompt.sh
+RUN mkdir /home/${DEV_USER}/scripts
+ADD resources/two_line_prompt.sh /home/${DEV_USER}/scripts/two_line_prompt.sh
 
-RUN echo "source /home/ageekinside/scripts/two_line_prompt.sh" >> /home/ageekinside/.bashrc
-RUN echo "source /home/ageekinside/scripts/two_line_prompt.sh" >> /home/ageekinside/.bash_profile
-WORKDIR /home/ageekinside
-
-# update pip
-RUN pip install --upgrade pip
+RUN echo "source /home/ageekinside/scripts/two_line_prompt.sh" >> /home/${DEV_USER}/.bashrc
+WORKDIR /home/${DEV_USER}
 
 # RUN mkdir tools
 # RUN git clone https://github.com/ryanoasis/nerd-fonts.git tools/nerd-fonts

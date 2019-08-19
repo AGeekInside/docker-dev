@@ -1,18 +1,19 @@
 FROM ageekinside/base
 
 # install pyenv
-
+ARG DEV_USER=ageekinside
+USER ${DEV_USER}
 RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-RUN echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
-RUN echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
-RUN echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bash_profile
+#RUN echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
+#RUN echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
+#RUN echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bash_profile
 RUN echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
 RUN echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
 RUN echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bashrc
 
 ENV PYENV_ROOT="$HOME/.pyenv"
 ENV PATH="${PYENV_ROOT}/bin:${HOME}/.local/bin:$PATH"
-ENV HOME  /home/ageekinside
+ENV HOME /home/${DEV_USER}
 ENV PYENV_ROOT $HOME/.pyenv
 ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
 
