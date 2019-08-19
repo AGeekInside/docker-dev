@@ -46,6 +46,8 @@ RUN add-apt-repository \
   && apt-get install -y docker-ce docker-ce-cli containerd.io \
   && rm -rf /var/lib/apt/lists/*
 
+ENV COMPOSE_VERSION 1.24.1
+
 RUN curl -ksSL "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
     && chmod +x /usr/local/bin/docker-compose
 
@@ -53,6 +55,8 @@ RUN curl -ksSL "https://github.com/docker/compose/releases/download/${COMPOSE_VE
 ARG DEV_USER=ageekinside
 RUN useradd --create-home --shell /bin/bash ${DEV_USER}
 RUN adduser ${DEV_USER} sudo
+RUN usermod -aG docker ${DEV_USER}
+RUN usermod -aG root ${DEV_USER}
 
 USER ${DEV_USER}
 ENV HOME /home/${DEV_USER}

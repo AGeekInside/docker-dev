@@ -1,4 +1,8 @@
 version: '3'
 
 services:
-  image: 
+  pydev:
+    image: ${DEV_USER}/pydev
+    command: /bin/sh -c "while sleep 1000; do :; done" 
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

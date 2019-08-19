@@ -1,7 +1,7 @@
 // See https://aka.ms/vscode-remote/devcontainer.json for format details.
 {
 	"name": "Docker Image Dev Env",
-	"dockerFile": "../resources/base.Dockerfile",
+	"dockerFile": "../dockerfiles/base.Dockerfile",
 	"context": "..",
 	"runArgs": [
 		"-v", "/var/run/docker.sock:/var/run/docker.sock"
