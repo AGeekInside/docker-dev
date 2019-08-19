@@ -58,12 +58,19 @@ RUN adduser ${DEV_USER} sudo
 RUN usermod -aG docker ${DEV_USER}
 RUN usermod -aG root ${DEV_USER}
 
+# Install neovim
+RUN apt-get update \
+  && apt-get install -y \
+    neovim \
+    python3-neovim \
+  && rm -rf /var/lib/apt/lists/*
+
 USER ${DEV_USER}
 ENV HOME /home/${DEV_USER}
-RUN mkdir -p $HOME/.venv
-ENV VIRTUAL_ENV=$HOME/.venv
-RUN python3 -m venv $VIRTUAL_ENV
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+#RUN mkdir -p $HOME/.venv
+#ENV VIRTUAL_ENV=$HOME/.venv
+#RUN python3 -m venv $VIRTUAL_ENV
+#ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 
 RUN mkdir /home/${DEV_USER}/scripts
@@ -71,6 +78,7 @@ ADD resources/two_line_prompt.sh /home/${DEV_USER}/scripts/two_line_prompt.sh
 
 RUN echo "source /home/ageekinside/scripts/two_line_prompt.sh" >> /home/${DEV_USER}/.bashrc
 WORKDIR /home/${DEV_USER}
+
 
 # RUN mkdir tools
 # RUN git clone https://github.com/ryanoasis/nerd-fonts.git tools/nerd-fonts

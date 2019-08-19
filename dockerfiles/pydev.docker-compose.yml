@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  pydev:
+  workspace:
     image: ${DEV_USER}/pydev
     command: /bin/sh -c "while sleep 1000; do :; done" 
     volumes:

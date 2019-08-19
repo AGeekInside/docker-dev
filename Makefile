@@ -13,6 +13,8 @@ export BROWSER_PYSCRIPT
 
 BROWSER := python -c "$$BROWSER_PYSCRIPT"
 
+PYDEV_PROJECT=pydev
+
 help:
 	@python resources/print_make_help.py Makefile
 
@@ -24,8 +26,10 @@ build-pydev : build-base ## Builds the python dev image
 
 pydev-up: ## Stands up a Pythond dev env.
 	docker-compose \
+		--project-name ${PYDEV_PROJECT} \
 		--file dockerfiles/pydev.docker-compose.yml \
-		up
+		up --detach
 
 pydev-attach : ## Attachs to the python development container.
-	docker 
+	docker exec -it \
+		${PYDEV_PROJECT}_workspace_1 /bin/bash 
