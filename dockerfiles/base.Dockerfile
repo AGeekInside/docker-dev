@@ -1,8 +1,8 @@
-ARG PYTHON_VERSION=3.7.4-buster
-
-FROM python:${PYTHON_VERSION}
-
-LABEL MAINTAINER AGeekInside <marcwbrooks@gmail.com>
+#ARG PYTHON_VERSION=3.7.4-buster
+ARG DEBIAN_VERSION=buster
+FROM debian:${DEBIAN_VERSION}
+ARG MAINTAINER="AGeekInside <marcwbrooks@gmail.com>"
+LABEL MAINTAINER $(MAINTAINER)
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -76,7 +76,7 @@ ENV HOME /home/${DEV_USER}
 RUN mkdir /home/${DEV_USER}/scripts
 ADD resources/two_line_prompt.sh /home/${DEV_USER}/scripts/two_line_prompt.sh
 
-RUN echo "source /home/ageekinside/scripts/two_line_prompt.sh" >> /home/${DEV_USER}/.bashrc
+RUN echo "source /home/${DEV_USER}/scripts/two_line_prompt.sh" >> /home/${DEV_USER}/.bashrc
 WORKDIR /home/${DEV_USER}
 
 
