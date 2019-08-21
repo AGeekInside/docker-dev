@@ -53,7 +53,9 @@ RUN curl -ksSL "https://github.com/docker/compose/releases/download/${COMPOSE_VE
 
 # Add user for dev work
 ARG DEV_USER=ageekinside
-RUN useradd --create-home --shell /bin/bash ${DEV_USER}
+ARG UID=1000
+ARG GID=1000
+RUN useradd --create-home --uid ${UID} --shell /bin/bash ${DEV_USER}
 RUN adduser ${DEV_USER} sudo
 RUN usermod -aG docker ${DEV_USER}
 RUN usermod -aG root ${DEV_USER}
