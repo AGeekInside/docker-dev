@@ -1,5 +1,5 @@
 ARG BASE_REPO=ageekinside
-FROM $(BASE_REPO)/base
+FROM ${BASE_REPO}/base
 
 # install pyenv
 ARG DEV_USER=ageekinside

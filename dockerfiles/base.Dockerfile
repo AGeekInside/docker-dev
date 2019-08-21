@@ -65,6 +65,18 @@ RUN apt-get update \
     python3-neovim \
   && rm -rf /var/lib/apt/lists/*
 
+# Install git town
+ENV GIT_TOWN_VERSION 7.2.1
+RUN curl -ksSL "https://github.com/Originate/git-town/releases/download/v${GIT_TOWN_VERSION}/git-town-amd64.deb" -o /tmp/git-town-amd64.deb \
+  && dpkg -i /tmp/git-town-amd64.deb
+
+# Install libraries required for compiling Python 
+
+RUN apt-get update \
+  && apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev \
+    libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
+    xz-utils tk-dev libffi-dev liblzma-dev python-openssl git \
+  && rm -rf /var/lib/apt/lists/*
 USER ${DEV_USER}
 ENV HOME /home/${DEV_USER}
 #RUN mkdir -p $HOME/.venv
