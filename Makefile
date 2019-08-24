@@ -25,10 +25,11 @@ build-pydev : build-base ## Builds the python dev image
 	docker build -t ageekinside/pydev -f dockerfiles/pydev.Dockerfile .
 
 pydev-up: ## Stands up a Pythond dev env.
-	docker-compose \
-		--project-name ${PYDEV_PROJECT} \
-		--file dockerfiles/pydev.docker-compose.yml \
-		up --detach
+	resources/start-pydev-project.sh ${PYDEV_PROJECT}
+	#docker-compose \
+		#--project-name ${PYDEV_PROJECT} \
+		#--file dockerfiles/pydev.docker-compose.yml \
+		#up --detach
 
 pydev-attach : ## Attachs to the python development container.
 	docker exec -it \

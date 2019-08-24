@@ -93,6 +93,9 @@ ADD resources/two_line_prompt.sh /home/${DEV_USER}/scripts/two_line_prompt.sh
 RUN echo "source /home/${DEV_USER}/scripts/two_line_prompt.sh" >> /home/${DEV_USER}/.bashrc
 WORKDIR /home/${DEV_USER}
 
+# TODO add in fixuid code
+
+https://github.com/boxboat/fixuid
 
 # RUN mkdir tools
 # RUN git clone https://github.com/ryanoasis/nerd-fonts.git tools/nerd-fonts
