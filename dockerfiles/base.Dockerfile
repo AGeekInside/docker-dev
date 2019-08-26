@@ -11,8 +11,6 @@ RUN apt-get update && apt-get install -y \
   build-essential \
   curl \
   git \
-  nodejs \
-  npm \
   wget \
   && rm -rf /var/lib/apt/lists/*
 
@@ -60,6 +58,16 @@ RUN adduser ${DEV_USER} sudo
 RUN usermod -aG docker ${DEV_USER}
 RUN usermod -aG root ${DEV_USER}
 
+
+RUN USER=${DEV_USER} && \
+    GROUP=${DEV_USER} && \
+    curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.4/fixuid-0.4-linux-amd64.tar.gz | tar -C /usr/local/bin -xzf - && \
+    chown root:root /usr/local/bin/fixuid && \
+    chmod 4755 /usr/local/bin/fixuid && \
+    mkdir -p /etc/fixuid && \
+    printf "user: $USER\ngroup: $GROUP\n" > /etc/fixuid/config.yml
+
+
 # Install neovim
 RUN apt-get update \
   && apt-get install -y \
@@ -95,9 +103,11 @@ WORKDIR /home/${DEV_USER}
 
 # TODO add in fixuid code
 
-https://github.com/boxboat/fixuid
+# https://github.com/boxboat/fixuid
 
 # RUN mkdir tools
 # RUN git clone https://github.com/ryanoasis/nerd-fonts.git tools/nerd-fonts
 
+USER ${DEV_USER}:${DEV_USER}
+ENTRYPOINT ["fixuid"]
 CMD ["/bin/bash"]

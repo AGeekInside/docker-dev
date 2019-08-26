@@ -4,7 +4,7 @@
 	"dockerFile": "../dockerfiles/base.Dockerfile",
 	"context": "..",
 	"runArgs": [
-		"-v", "/var/run/docker.sock:/var/run/docker.sock"
+		"-v", "//var/run/docker.sock:/var/run/docker.sock"
 	],
 	// Uncomment the next line if you want to publish any ports.
 	// "appPort": [],

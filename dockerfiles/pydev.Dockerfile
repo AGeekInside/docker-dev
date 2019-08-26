@@ -38,7 +38,9 @@ RUN python3 -m pip install -r base-packages.txt
 # Add startup scripts
 RUN mkdir ${HOME}/env-setup
 ADD resources/*dev-env.sh ${HOME}/env-setup
+USER root
 RUN chmod +x ${HOME}/env-setup/*
 
+USER ${DEV_USER}
 
 CMD ["/bin/bash"]
