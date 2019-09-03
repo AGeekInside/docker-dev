@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  workspace:
+    image: ${DEV_USER}/dev/${PYDEV_PROJECT}
+    command: /home/${DEV_USER}/env-setup/start-dev-env.sh
+    hostname: dev-{{cookiecutter.name}} 
+    environment:
+     - HOST_UID=${curr_uid}
+     - HOST_GID=${curr_gid}
+     - DEV_USER=${DEV_USER}
+    volumes:
+      - ./${PYDEV_PROJECT}:/home/${DEV_USER}/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${HOME}/.ssh:/home/${DEV_USER}/.ssh-localhost
