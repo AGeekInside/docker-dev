@@ -11,5 +11,5 @@ FIXGID=curr_gid
 
 docker-compose \
     --project-name ${PYDEV_PROJECT} \
-    --file ../dockerfiles/pydev.docker-compose.yml \
+    --file dockerfiles/pydev.docker-compose.yml \
     up --detach

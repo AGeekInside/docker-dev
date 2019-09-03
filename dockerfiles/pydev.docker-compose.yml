@@ -12,4 +12,5 @@ services:
     volumes:
       - ./:/home/${DEV_USER}/workspace
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${PROJS_DIR}:/home/${DEV_USER}/projs
+      - ${HOME}/.ssh:/home/${DEV_USER}/.ssh-localhost
+      # - ${PROJS_DIR}:/home/${DEV_USER}/projs
