@@ -23,7 +23,7 @@ def populate_recipe(recipe_root):
     ]
 
     for file_to_copy in files_to_copy:
-        copyfile(file_to_copy, recipe_root+f"/{file_to_copy}")
+        copyfile(file_to_copy, recipe_root + f"/{file_to_copy}")
 
 
 def run_cookiecutter(name, username, recipe):
@@ -59,7 +59,10 @@ def run_cookiecutter(name, username, recipe):
     show_default="current user",
     help="Username to use in the docker development environment.",
 )
-def build_dev_env(name, directory, username):
+@click.option(
+    "-r", "--repo", help="Repo to clone for development environment.", default=None
+)
+def build_dev_env(name, directory, username, repo):
     """Builds a dev env/directory with the needed files to build a docker dev env."""
 
     print(f"Preparing development environment for {name} in {directory}.")
@@ -67,8 +70,13 @@ def build_dev_env(name, directory, username):
     recipe_root = PYTHON_RECIPE + "/{{cookiecutter.directory_name}}"
 
     populate_recipe(recipe_root)
-    
+
     run_cookiecutter(name, username, recipe=PYTHON_RECIPE)
+
+    dev_env_dir = directory + f"/{name}"
+
+    if repo:
+        clone_repo(dev_env_dir)
 
 
 if __name__ == "__main__":
