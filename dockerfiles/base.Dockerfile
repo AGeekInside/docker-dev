@@ -108,6 +108,6 @@ WORKDIR /home/${DEV_USER}
 # RUN mkdir tools
 # RUN git clone https://github.com/ryanoasis/nerd-fonts.git tools/nerd-fonts
 
-USER ${DEV_USER}:${DEV_USER}
-ENTRYPOINT ["fixuid"]
+# USER ${DEV_USER}:${DEV_USER}
+# ENTRYPOINT ["fixuid"]
 CMD ["/bin/bash"]

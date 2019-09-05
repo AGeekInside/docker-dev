@@ -10,6 +10,6 @@ FIXID=curr_uid
 FIXGID=curr_gid
 
 docker-compose \
-    --project-name dev/$PYDEV_PROJECT \
+    --project-name dev_${PYDEV_PROJECT} \
     --file docker/dev-${PYDEV_PROJECT}.docker-compose.yml \
     up --detach
