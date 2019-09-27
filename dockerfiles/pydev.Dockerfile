@@ -4,6 +4,9 @@ FROM ${BASE_REPO}/base
 # install pyenv
 ARG DEV_USER=ageekinside
 USER ${DEV_USER}
+
+# REMOVE THIS, UNLESS YOU KNOW WHAT YOU ARE DOING
+ENV GIT_SSL_NO_VERIFY=1
 RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv
 #RUN echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
 #RUN echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
@@ -37,7 +40,7 @@ RUN python3 -m pip install -r base-packages.txt
 
 # Add startup scripts
 RUN mkdir ${HOME}/env-setup
-ADD resources/*dev-env.sh ${HOME}/env-setup
+ADD resources/*dev-env.sh ${HOME}/env-setup/
 USER root
 RUN chmod +x ${HOME}/env-setup/*
 
