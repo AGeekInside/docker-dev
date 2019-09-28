@@ -93,4 +93,6 @@ ADD resources/two_line_prompt.sh /home/${DEV_USER}/scripts/two_line_prompt.sh
 RUN echo "source /home/${DEV_USER}/scripts/two_line_prompt.sh" >> /home/${DEV_USER}/.bashrc
 WORKDIR /home/${DEV_USER}
 
-CMD ["/bin/bash"]
+ADD resources/start-dev-env.sh /home/${DEV_USER}/scripts/
+
+CMD [ "/home/${DEV_USER}/scripts/start-dev-env.sh"]
