@@ -46,4 +46,4 @@ RUN chmod +x ${HOME}/env-setup/*
 
 USER ${DEV_USER}
 
-CMD ["/bin/bash"]
+CMD ["sh", "-c", "${HOME}/scripts/start-dev-env.sh"]
