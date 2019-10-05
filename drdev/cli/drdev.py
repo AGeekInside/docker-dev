@@ -18,7 +18,7 @@ def check_dir_exists(dirname: str):
 @click.argument("src_dir", type=click.Path(exists=True))
 @click.option("-r", "--repo", default="ageekinside")
 @click.option("--ssh_dir")
-def spin_dev_container(src_dir: str, repo: str, ssh_dir: str):
+def run_drdev(src_dir: str, repo: str, ssh_dir: str):
     """Starts a docker container with the directory mounted as workspace.
 
     \b
@@ -61,4 +61,4 @@ def spin_dev_container(src_dir: str, repo: str, ssh_dir: str):
 
 
 if __name__ == "__main__":
-    spin_dev_container()
+    run_drdev()
