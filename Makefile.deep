@@ -1,0 +1,291 @@
+.PHONY: build clean coverage dist docs help install release servedocs test
+.DEFAULT_GOAL := help
+define BROWSER_PYSCRIPT
+import os, webbrowser, sys
+try:
+	from urllib import pathname2url
+except:
+	from urllib.request import pathname2url
+
+webbrowser.open("file://" + pathname2url(os.path.abspath(sys.argv[1])))
+endef
+export BROWSER_PYSCRIPT
+
+define PRINT_HELP_PYSCRIPT
+import re, sys
+
+for line in sys.stdin:
+	match = re.match(r'^([a-zA-Z_-]+):.*?## (.*)$$', line)
+	if match:
+		target, help = match.groups()
+		print("%-20s %s" % (target, help))
+endef
+export PRINT_HELP_PYSCRIPT
+BROWSER := python -c "$$BROWSER_PYSCRIPT"
+
+## Version is hardcoded and should only be modified by bumpversion.
+VERSION=2.10.2rc0
+
+HOME_DIR = ${HOME}/
+PROJS_DIR = $(HOME_DIR)projs/lra/
+
+KAFKA_DIR = $(PROJS_DIR)kafka-docker/
+LRADOCKER_DIR = $(PROJS_DIR)lradocker/
+SHIM_DIR = $(PROJS_DIR)shim/
+SHIMNOOP_DIR = (SHIM_DIR)apps/shimnoop/
+SHIM_IMG_DIR = $(SHIM_DIR)images/
+SHIM_APP_DOCKERIMG = $(SHIM_IMG_DIR)shim_$(VERSION).tar
+
+## Passes extra build-args for labelling (jenkins targets only).
+TAG_PREFIX ?= "prefix_undefined"
+JENKINS_BUILD_TAG ?= "build_tag_undefined"
+BRANCH_TAG ?= "branch_undefined"
+LATEST_TAG ?= "latest_tag_undefined"
+GIT_COMMIT ?= "git_commit_undefined"
+BASE_IMAGE_TAG ?= "base_image_undefined"
+SHIM_BASE_IMAGE_TAG ?= "shim_base_image_undefined"
+
+help:
+	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
+
+clean: clean-build clean-pyc clean-test clean-images ## Remove all build, test, coverage and Python artifacts	
+
+clean-build: ## Remove build artifacts
+	rm -fr build/ rm -fr dist/
+	rm -fr .eggs/
+	find . -name '*.egg-info' -exec rm -fr {} +
+	find . -name '*.egg' -exec rm -f {} +
+
+clean-pyc: ## Remove Python file artifacts
+	find . -name '*.pyc' -exec rm -f {} +
+	find . -name '*.pyo' -exec rm -f {} +
+	find . -name '*~' -exec rm -f {} +
+	find . -name '__pycache__' -exec rm -fr {} +
+
+clean-test: ## Remove test and coverage artifacts
+	rm -fr .tox/
+	rm -f .coverage
+	rm -fr htmlcov/
+
+clean-images: ## Remove the docker images that have been written.
+	rm -rf $(SHIM_IMG_DIR)
+
+lint: ## Check style with flake8
+	pylint shim
+
+black: ## Runs black on the code base
+	black shim
+
+time-test: ## Runs the tests and outputs the timings of each test
+	pytest --durations=0
+
+test-unit: ## Run unit tests 
+	pytest tests/test_shim.py
+
+test-integration: ## Run integration tests
+	pytest tests/test_integration.py
+
+test: test-unit ## Run unit tests
+
+test-all: test-unit test-integration ## Run unit and integration tests
+
+coverage-only: 
+		cd tests
+		pytest --cov=shim tests/test_shim.py
+		coverage report -m
+		coverage html
+		cd ..
+
+coverage: coverage-only ## check code coverage quickly with the default Python
+		$(BROWSER) htmlcov/index.html
+
+docs: ## generate Sphinx HTML documentation, including API docs
+	rm -f docs/shim.rst
+	rm -f docs/modules.rst
+	sphinx-apidoc -o docs/ shim
+	$(MAKE) -C docs clean
+	$(MAKE) -C docs html
+	$(BROWSER) docs/_build/html/index.html
+
+servedocs: docs ## compile the docs watching for changes
+	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
+
+release: clean ## package and upload a release
+	python setup.py sdist upload -r local
+
+dist: clean ## builds source and wheel package
+	python setup.py sdist
+	#python setup.py bdist_whee
+	ls -l dist
+
+dev-build: clean ## Rebuilds the dev env.
+	docker/dev/build-dev-env.sh docker/dev/dev-env.Dockerfile
+
+dev-up: dev-build ## starts docker compose dev env
+	docker-compose \
+		--project-name ${USER}-dev \
+		--file docker/dev/docker-compose.yml up --detach
+
+dev-down:  ## !!!! brings down the dev env and REMOVES DEV ENV
+	docker-compose \
+		--project-name ${USER}-dev \
+		--file docker/dev/docker-compose.yml down 
+
+dev-stop:  ## brings down the docker compose dev env
+	docker-compose \
+		--project-name ${USER}-dev \
+		--file docker/dev/docker-compose.yml stop 
+
+dev-attach: ## attach to the dev container for dev env
+	docker exec --interactive --tty ${USER}-dev_shim_1 /bin/bash 
+
+dev-attach-root: ## attach to the dev container for dev env
+	docker exec -u root -it ${USER}-dev_shim_1 /bin/bash 
+
+install: clean ## install the package to the active Python's site-packages
+	python setup.py install
+
+build-base: ## Builds the base docker container used by the shim.
+	cd $(LRADOCKER_DIR) ; \
+	docker build \
+		-f $(LRADOCKER_DIR)/baseanalytics/Dockerfile \
+		-t lra/baseanalytics \
+		.
+
+build-gen: dist ## Builds the Kafkagen docker image
+	cd $(KAFKAGEN_DIR) ; \
+	docker build \
+		-t lra/kafkagen \
+		-f docker/app/Dockerfile \
+		.
+
+build-shim-only: ## Only builds the Dev version of the shim image
+	cd $(SHIM_DIR) ; \
+	docker build \
+		-f docker/dev/Dockerfile \
+		-t lra/shim_dev \
+		. ;
+
+build-es: ## Build the Elasticsearch server for Shim work
+	cd $(SHIM_DIR) ; \
+	docker build \
+		-f docker/services/elasticsearch/Dockerfile \
+		-t lra/elasticsearch \
+		.
+
+build-nb: ## Build the Jupyter notebook server for Shim work
+	cd $(SHIM_DIR) ; \
+	docker build \
+		-f docker/jupyter/Dockerfile \
+		-t lra/shim_nb \
+		.
+
+build-dev-env: ## Builds an image for shim development.
+	cd $(SHIM_DIR) ;
+	docker build \
+		-t lra/dev-env \
+		-t lra/dev-env:$(VERSION) \
+		-t lra/dev-env:latest \
+		-f docker/dev/dev-env.Dockerfile \
+		.
+		
+build-spooler: ## Builds an image to run spooler.
+	cd $(SHIM_DIR) ;
+	docker build \
+		-t lra/spooler \
+		-t lra/spooler:$(VERSION) \
+		-t lra/spooler:latest \
+		-f docker/dev/spooler.Dockerfile \
+		.
+		
+build-shim:  build-base ## Builds the App version of shim image
+	cd $(SHIM_DIR) ;
+	docker build \
+		-t lra/shim \
+		-t lra/shim:$(VERSION) \
+		-t lra/shim:latest \
+		-f docker/dev/Dockerfile \
+		.
+
+build-shimnoop:  ## Builds the App version of shim image
+	cd $(SHIMNOOP_DIR) ;
+	docker build \
+		-t lra/shimnoop \
+		-t lra/shimnoop:$(VERSION) \
+		-t lra/shimnoop:latest \
+		$(SHIMNOOP_DIR)
+
+build-verifier:  ## Builds an image to run connection_verify
+	cd $(SHIM_DIR)
+	docker build \
+		-t lra/verify \
+		-t lra/verify:$(VERSION) \
+		.
+
+build-kcheck:  ## Builds an image for a tool to check status fo kafka channels
+	cd $(LRADOCKER_DIR) ; \
+	docker build \
+		-f $(LRADOCKER_DIR)/kcheck/Dockerfile \
+		-t lra/kcheck \
+		-t lra/kcheck:$(VERSION) \
+		.
+
+build: build-shim-only dist ## Builds everything
+
+start-kafka:  ## Starts the kafka services locally
+	cd $(KAFKA_DIR) ; \
+	docker-compose \
+		-f $(KAFKA_DIR)docker-compose.yml \
+	    -p shim-kafka \
+		up -d	
+
+run-dev: build-dev
+	cd $(SHIM_DIR) ; \
+	docker-compose \
+		-f docker/shim_dev/docker-compose.yml \
+		up
+
+save-app: ## Saves the Shim App image
+	cd $(SHIM_DIR)
+	mkdir -p $(SHIM_IMG_DIR)
+	docker save -o $(SHIM_APP_DOCKERIMG) \
+		lra/shim:$(VERSION)
+	gzip $(SHIM_APP_DOCKERIMG)
+
+## 1. It assumes that baseanalytics was already built and tagged by another
+## Jenkins job as lra/baseanalytics:BASE_TAG.
+## 2. Jenkins freestyle Docker jobs should override SHIM_DIR to point to
+## the current working directory.
+build-shim-jenkins: ## Based on build-shim.
+	cd $(SHIM_DIR) ; \
+	docker build \
+		-f docker/dev/Dockerfile \
+		-t lra/shim_dev:$(TAG_PREFIX)_$(JENKINS_BUILD_TAG) \
+		-t lra/shim_dev:$(TAG_PREFIX)_$(VERSION)_$(BRANCH_TAG) \
+		-t lra/shim_dev:$(TAG_PREFIX)_$(LATEST_TAG)_$(BRANCH_TAG) \
+		--build-arg NAME="lra/shim_dev" \
+		--build-arg VERSION_LABEL=$(VERSION) \
+		--build-arg VCS_REF=$(GIT_COMMIT) \
+		--build-arg BASE_TAG="$(SHIM_BASE_IMAGE_TAG)" \
+		--no-cache \
+		. ;
+
+## 1. It assumes that shim was already built and tagged by another
+## Jenkins job as lra/baseanalytics:BASE_IMAGE_TAG.
+## 2. Jenkins freestyle Docker jobs should override SHIM_DIR to point to
+## the current working directory so SHIMNOOP_DIR will resolve correctly.
+## 3. Dockerfile.jenkins has extra instructions to copy in and install a 
+## tar.gz of the shim Python package (copied in by Jenkins).
+build-shimnoop-jenkins: build-shim-jenkins ## Builds the shim no-op Docker image for Jenkins.
+	cd $(SHIMNOOP_DIR); \
+	docker build \
+		-f Dockerfile.jenkins \
+		-t lra/shimnoop:$(TAG_PREFIX)_$(JENKINS_BUILD_TAG) \
+		-t lra/shimnoop:$(TAG_PREFIX)_$(VERSION)_$(BRANCH_TAG) \
+		-t lra/shimnoop:$(TAG_PREFIX)_$(LATEST_TAG)_$(BRANCH_TAG) \
+		--build-arg NAME="lra/shimnoop" \
+		--build-arg VERSION_LABEL=$(VERSION) \
+		--build-arg VCS_REF=$(GIT_COMMIT) \
+		--build-arg BASE_TAG="$(BASE_IMAGE_TAG)" \
+		--no-cache \
+		.;
