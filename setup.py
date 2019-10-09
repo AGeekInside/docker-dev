@@ -26,7 +26,7 @@ with open('requirements.txt', 'r') as f:
         REQUIRED.append(line.strip())
 
 CONSOLE_SCRIPTS = [ 
-    "drdev=drdev.cli.drdev:run_drdev",
+    "drdev=drdev.cli.drdev:cli",
 ]
 ENTRY_POINTS = {
     "console_scripts": CONSOLE_SCRIPTS,
