@@ -13,12 +13,17 @@ def check_dir_exists(dirname: str):
         print(f"{dirname} is a not a directory")
         sys.exit()
 
+@click.group()
+def cli():
+    """Main command for the drdev cli."""
 
-@click.command()
+    pass
+
+@cli.command()
 @click.argument("src_dir", type=click.Path(exists=True))
 @click.option("-r", "--repo", default="ageekinside")
 @click.option("--ssh_dir")
-def run_drdev(src_dir: str, repo: str, ssh_dir: str):
+def spinup(src_dir: str, repo: str, ssh_dir: str):
     """Starts a docker container with the directory mounted as workspace.
 
     \b
@@ -61,4 +66,4 @@ def run_drdev(src_dir: str, repo: str, ssh_dir: str):
 
 
 if __name__ == "__main__":
-    run_drdev()
+    cli()
