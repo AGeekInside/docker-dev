@@ -1,2 +1,4 @@
 .env
 resources/customize-dev-env.sh
+*__pycache__*
+drdev.egg*
